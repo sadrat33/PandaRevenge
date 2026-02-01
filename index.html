@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>解謎遊戲｜第一關</title>
+
+<style>
+body{
+  margin:0;
+  font-family:"Noto Sans TC",sans-serif;
+  background:#2b2b2b;
+  color:#fff;
+}
+
+/* ===== 槌子游標 ===== */
+body.hammer{cursor:url("hammer.png") 32 32,auto;}
+body.hammer.hit{cursor:url("hammer_hit.png") 32 32,auto;}
+
+/* ===== HUD ===== */
+.hud{
+  position:fixed;
+  top:15px;
+  left:15px;
+  width:200px;
+  z-index:999;
+}
+.health-bar{
+  height:18px;
+  background:#555;
+  border-radius:10px;
+  overflow:hidden;
+}
+.health-fill{
+  height:100%;
+  background:linear-gradient(90deg,#ff5c5c,#ff9b9b);
+}
+.mouse-area{
+  display:flex;
+  gap:6px;
+  margin-top:6px;
+}
+.mouse{width:28px;}
+
+/* ===== 主框 ===== */
+.game-box{
+  width:760px;
+  margin:60px auto;
+  background:#1f1f1f;
+  padding:40px;
+  border-radius:16px;
+  text-align:center;
+}
+
+/* ===== 第一關 ===== */
+.panda img{width:160px;}
+.hint{background:#333;padding:14px;border-radius:8px;margin:18px 0;}
+input{padding:12px;width:80%;border-radius:6px;border:none;}
+button{padding:12px 26px;border:none;border-radius:6px;background:#ff5c5c;color:#fff;cursor:pointer;}
+.door{font-size:90px;animation:openDoor 1.5s forwards;}
+@keyframes openDoor{to{transform:scaleX(0);opacity:0;}}
+
+/* ===== 走廊 ===== */
+#roomSelect{
+  background:url("aisle.jpg") center/cover no-repeat;
+  padding:40px;
+  border-radius:14px;
+}
+.door-selection{display:flex;justify-content:space-between;margin-top:30px;}
+.room-door img{width:140px;}
+.sign-img{width:90px;cursor:pointer;margin-top:8px;}
+
+/* ===== 浴室門 ===== */
+.bathroom-door{
+  width:360px;height:480px;
+  display:flex;overflow:hidden;margin:auto;
+}
+.bathroom-door img{width:50%;}
+.open-left{animation:leftOpen 1.5s forwards;}
+.open-right{animation:rightOpen 1.5s forwards;}
+@keyframes leftOpen{to{transform:translateX(-100%);}}
+@keyframes rightOpen{to{transform:translateX(100%);}}
+
+/* ===== 浴室 ===== */
+#bathroomScene{
+  display:none;
+  background:url("pandatub.png") center/cover no-repeat;
+  height:540px;
+  border-radius:14px;
+  padding:30px;
+  position:relative;
+}
+.bath-title{font-size:28px;background:#fff;color:#000;display:inline-block;padding:6px 12px;border-radius:6px;}
+.bath-desc{font-size:16px;background:#fff;color:#000;margin-top:10px;display:inline-block;padding:6px 12px;border-radius:6px;}
+
+.start-btn{
+  background:#6b3e26;
+  color:#fff;
+  padding:12px 30px;
+  border-radius:8px;
+  cursor:pointer;
+  margin-top:16px;
+  display:inline-block;
+  position:relative;
+  z-index:5;
+}
+
+#bathGame{
+  position:relative;
+  width:100%;
+  height:360px;
+  margin-top:10px;
+}
+.spawn{
+  position:absolute;
+  width:90px;
+  cursor:pointer;
+}
+.score-float{
+  position:absolute;
+  font-weight:bold;
+  animation:floatUp 1s forwards;
+}
+@keyframes floatUp{to{transform:translateY(-30px);opacity:0;}}
+</style>
+</head>
+
+<body>
+
+<!-- HUD -->
+<div class="hud">
+  <div class="health-bar"><div id="healthFill" class="health-fill"></div></div>
+  <div id="mouseArea" class="mouse-area"></div>
+
+  <!-- 分數：只在浴室顯示 -->
+  <div id="scoreWrap" style="display:none;">
+    分數：<span id="bathScore">0</span>
+  </div>
+</div>
+
+<div class="game-box">
+
+<div id="level1">
+  <h2>第一關：推開大門</h2>
+  <div class="panda"><img src="panda1.jpg"></div>
+  <div class="hint">哪個是悲傷大鼠最喜歡的暱稱(四個字，包含地名)</div>
+  <input id="answer">
+  <br><button onclick="checkAnswer()">解鎖</button>
+</div>
+
+<div id="doorAnimation" style="display:none;"><div class="door">🚪</div></div>
+
+<div id="roomSelect" style="display:none;">
+  <div class="door-selection">
+    <div class="room-door">
+      <img src="浴室門.png">
+      <img src="浴室門牌.png" class="sign-img" onclick="enterBathroom()">
+    </div>
+    <div class="room-door">
+      <img src="客廳門.png">
+      <img src="客廳門牌.png" class="sign-img">
+    </div>
+    <div class="room-door">
+      <img src="房間門.png">
+      <img src="房間門牌.png" class="sign-img">
+    </div>
+  </div>
+</div>
+
+<div id="bathroomDoor" style="display:none;">
+  <div class="bathroom-door">
+    <img src="浴室門.png" id="bathLeft">
+    <img src="浴室門.png" id="bathRight">
+  </div>
+</div>
+
+<div id="bathroomScene">
+  <div class="bath-title">誰要跟本貓泡澡</div><br>
+  <div class="bath-desc">遊戲玩法：使用槌子打不是某貓情婦的情婦，達到15分即可通關</div><br>
+  <div class="start-btn" onclick="startBathGame()">開始</div>
+  <div id="bathGame"></div>
+</div>
+
+</div>
+
+<script>
+let health=100, mistakes=0;
+const healthFill=document.getElementById("healthFill");
+const mouseArea=document.getElementById("mouseArea");
+const scoreWrap=document.getElementById("scoreWrap");
+
+function updateHUD(){
+  healthFill.style.width=health+"%";
+  mouseArea.innerHTML="";
+  for(let i=0;i<mistakes;i++){
+    let m=document.createElement("img");
+    m.src="mouse血條.png";
+    m.className="mouse";
+    mouseArea.appendChild(m);
+  }
+}
+updateHUD();
+
+function checkAnswer(){
+  if(answer.value.trim()==="表參道鼠"){
+    level1.style.display="none";
+    doorAnimation.style.display="block";
+    setTimeout(()=>{
+      doorAnimation.style.display="none";
+      roomSelect.style.display="block";
+    },1500);
+  }else{
+    health-=20;
+    mistakes++;
+    updateHUD();
+  }
+}
+
+/* ===== 浴室遊戲 ===== */
+let bathScore=0, timer;
+const good=["notlover1.png","notlover2.png","notlover3.png","notlover4.png"];
+const bad=["lover1.png","lover2.png","lover3.png","lover4.png","lover5.png"];
+
+document.body.addEventListener("mousedown",()=>{if(document.body.classList.contains("hammer"))document.body.classList.add("hit");});
+document.body.addEventListener("mouseup",()=>{document.body.classList.remove("hit");});
+
+function enterBathroom(){
+  roomSelect.style.display="none";
+  bathroomDoor.style.display="block";
+  scoreWrap.style.display="block";   // 顯示分數
+  setTimeout(()=>{
+    bathLeft.classList.add("open-left");
+    bathRight.classList.add("open-right");
+  },100);
+  setTimeout(()=>{
+    bathroomDoor.style.display="none";
+    bathroomScene.style.display="block";
+  },1600);
+}
+
+function backToHall(){
+  document.body.classList.remove("hammer");
+  bathroomScene.style.display="none";
+  roomSelect.style.display="block";
+  scoreWrap.style.display="none";   // 隱藏分數
+}
+
+function startBathGame(){
+  document.body.classList.add("hammer");
+  bathScore=0;
+  document.getElementById("bathScore").textContent=0;
+
+  const game=document.getElementById("bathGame");
+  game.innerHTML="";
+
+  clearInterval(timer);
+  timer=setInterval(()=>{
+    game.innerHTML="";
+    let pool=[...good,...bad].sort(()=>Math.random()-0.5).slice(0,4);
+    pool.forEach(src=>{
+      let img=document.createElement("img");
+      img.src=src;
+      img.className="spawn";
+      img.style.left=Math.random()*80+"%";
+      img.style.top=Math.random()*70+"%";
+      img.onclick=()=>{
+        let txt=document.createElement("div");
+        txt.className="score-float";
+        txt.style.left=img.style.left;
+        txt.style.top=img.style.top;
+        if(good.includes(src)){
+          bathScore++;
+          txt.style.color="lime";
+          txt.textContent="+1分";
+        }else{
+          bathScore--;
+          txt.style.color="red";
+          txt.textContent="某貓:-1 我才不要她哼哼";
+        }
+        document.getElementById("bathScore").textContent=bathScore;
+        game.appendChild(txt);
+
+        if(bathScore>=15){
+          clearInterval(timer);
+          document.body.classList.remove("hammer");
+          game.innerHTML=`
+            <img src="pandabath.jpg" style="width:260px;margin-top:20px;"><br>
+            <h2 style="color:lime;">🎉 通關成功！</h2>
+            <button onclick="backToHall()">返回走廊</button>
+          `;
+        }
+      };
+      game.appendChild(img);
+    });
+  },3000); // 每 3 秒刷新
+}
+</script>
+
+</body>
+</html>
