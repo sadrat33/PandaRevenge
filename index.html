@@ -189,7 +189,7 @@ input { padding: 12px; width: 80%; border-radius: 6px; border: none; }
 
   <div id="livingRoomScene" class="scene">
     <h2 class="white-bg-black-text">身為男人的考驗</h2>
-    <p class="white-bg-black-text">70秒內依序排列事件 (遠到近)</p>
+    <p class="white-bg-black-text">70秒內依事件發生時間排列 (遠到近)</p>
     <button onclick="startLivingGame()">開始挑戰</button>
     <div id="livingGame" style="display:none">
       <div class="white-bg-black-text">⏱ <span id="timeText">70</span>s</div>
@@ -208,7 +208,7 @@ input { padding: 12px; width: 80%; border-radius: 6px; border: none; }
     <div id="roomStartUI">
       <div class="black-bg-red-text">記憶中的小孩</div>
       <p class="white-bg-black-text">遊戲玩法：60秒內用杯子接住你心目中最可愛、最純真、<br>
-      肚肚有一點點??的那位，接錯6次也是挑戰失敗
+      肚肚有一點點??的那位，超過時間或接錯6次為挑戰失敗
       <br><button onclick="startRoomGame()">開始接小孩</button>
     </div>
     
@@ -221,13 +221,13 @@ input { padding: 12px; width: 80%; border-radius: 6px; border: none; }
     <div id="roomResultArea" class="room-result" style="display:none"></div>
   </div>
 
-  <div id="rewardScene" class="scene">
+  <div id="rewardScene" class="scene" style="background-color: #808080; padding: 20px;">
     <div class="black-bg-red-text">❤️ 最終驚喜 ❤️</div>
     <img src="pandacon.png" style="width:300px; display:block; margin:20px auto;">
     <h2 style="color: #ffc0cb;">好吧!原諒你一次，請好好愛我~</h2>
     <br>
     <button onclick="location.reload()">重新開始遊戲</button>
-  </div>
+</div>
 
 </div>
 
